@@ -1,0 +1,12 @@
+# Конфигурация для бесплатного деплоя на Render.com
+services:
+  - type: web
+    name: reminder-bot
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py
+    healthCheckPath: /health
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false   # значение вводится вручную в панели Render
