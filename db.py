@@ -48,11 +48,20 @@ async def init_db(path: str = "reminders.db") -> None:
         _db = await aiosqlite.connect(path)
         _db.row_factory = aiosqlite.Row
         await _db.executescript(SCHEMA)
-        await _db.commit()
+        await _commit()
 
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+async def _commit() -> None:
+    await _db.commit()
+    try:
+        from storage import mark_dirty
+        mark_dirty()
+    except Exception:
+        pass
 
 
 # ---------- Пользователи ----------

@@ -16,6 +16,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 
 import db
+import storage
 from handlers import router
 from scheduler import scheduler_loop
 
@@ -51,6 +52,7 @@ async def main() -> None:
             "Задай её так: TELEGRAM_BOT_TOKEN=<токен> python bot.py"
         )
 
+    await asyncio.to_thread(storage.init_remote_db)
     await db.init_db()
     bot = Bot(token=TOKEN)
     dp = Dispatcher(storage=MemoryStorage())
@@ -70,6 +72,11 @@ async def main() -> None:
         await dp.start_polling(bot)
     finally:
         scheduler.cancel()
+        try:
+            await asyncio.wait_for(asyncio.to_thread(storage.maybe_flush, True),
+                                   timeout=15)
+        except Exception:
+            pass
         await bot.session.close()
         if http_runner is not None:
             await http_runner.cleanup()

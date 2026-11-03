@@ -10,6 +10,7 @@ from aiogram.exceptions import TelegramAPIError
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 import db
+import storage
 
 log = logging.getLogger(__name__)
 
@@ -78,4 +79,5 @@ async def scheduler_loop(bot: Bot) -> None:
             await send_due(bot)
         except Exception:
             log.exception("Ошибка в цикле планировщика")
+        await asyncio.to_thread(storage.maybe_flush)
         await asyncio.sleep(CHECK_INTERVAL)
